@@ -1,5 +1,6 @@
-import { initQuery } from "./query-string.js";
-import getJson from "./json.js";
+import { initQuery } from "./query-string";
+import getJson from "./json";
+import type { BuiltInData, Config, Data, State } from "./config";
 
 export const oneDay = 1000 * 60 * 60 * 24;
 
@@ -10,15 +11,19 @@ export const COMPLETED = 2;
 export const CHEATED = 3;
 export const FAILED = 4;
 
-export default function dailyInit({ launchDate, skipDates }, storage) {
+export type Result = typeof UNPLAYED | typeof PLAYED | typeof COMPLETED | typeof CHEATED | typeof FAILED;
+
+export type Daily = ReturnType<typeof dailyInit>;
+
+export default function dailyInit({ launchDate, skipDates, allowFuturePuzzles }: Config<Data>, storage: BuiltInData<State>) {
     const epoch = parseDate(launchDate);
     const todaysPuzzleId = getTodaysPuzzleId();
     const puzzleId = initQuery.p ?? todaysPuzzleId.toString();
     const isTodaysPuzzle = puzzleId == todaysPuzzleId;
 
     async function loadPuzzle() {
-        if (!/^\d+\+?$/.test(puzzleId)) throw new Error("Invalid puzzle code");
-        if (/^\d+$/.test(puzzleId) && parseInt(puzzleId, 10) > todaysPuzzleId)
+        if (!/^\d+f?$/.test(puzzleId)) throw new Error("Invalid puzzle code");
+        if ((/^\d+$/.test(puzzleId) || !allowFuturePuzzles) && parseInt(puzzleId, 10) > todaysPuzzleId)
             throw new Error("Puzzle not available yet");
         const strictId = puzzleId.replace(/\+/,'');
         try {
@@ -29,18 +34,15 @@ export default function dailyInit({ launchDate, skipDates }, storage) {
         }
     }
 
-    function setResult(result) {
+    function setResult(result: Result) {
         storage.results = {
             ...storage.results,
             [puzzleId]: result
         };
         if (isTodaysPuzzle) updateStreak(result);
-        const option = document.querySelector(`option[value="${puzzleId}"]`);
-        if (option) option.innerHTML = optionText(puzzleId);
-        updateStreakDom();
     }
 
-    function updateStreak(result) {
+    function updateStreak(result: Result) {
         switch (result) {
             case COMPLETED:
                 const intPId = parseInt(puzzleId, 10);
@@ -71,11 +73,10 @@ export default function dailyInit({ launchDate, skipDates }, storage) {
 
     return { epoch, todaysPuzzleId, puzzleId, isTodaysPuzzle, loadPuzzle, onStart, onCheat, onWin };
 
-    // returns ms from 1970-01-01T00:00:00.000Z
-    function parseDate(dateString) {
+    /** returns ms from 1970-01-01T00:00:00.000Z */
+    function parseDate(dateString: string) {
         const parts = dateString.split('-').map(x => parseInt(x, 10));
-        --parts[1];
-        return Date.UTC(...parts);
+        return Date.UTC(parts[0], parts[1] - 1, parts[2]);
     }
 
     function getTodaysPuzzleId() {
@@ -85,7 +86,7 @@ export default function dailyInit({ launchDate, skipDates }, storage) {
         return id - skipDates.filter(dateIsTodayOrEarlier).length;
     }
 
-    function dateIsTodayOrEarlier(dateString) {
+    function dateIsTodayOrEarlier(dateString: string) {
         return parseDate(dateString) < Date.now();
     }
 }

@@ -1,0 +1,17 @@
+{
+  "name": "example",
+  "version": "1.0.0",
+  "main": "config.js",
+  "scripts": {
+    "dev": "rm -rf dist; mkdir -p dist/puzzles; cp -r puzzles dist; parcel index.html"
+  },
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "parcel": "^2.13.3"
+  },
+  "dependencies": {
+    "daily-game-kit": "file:.."
+  }
+}

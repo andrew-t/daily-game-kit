@@ -1,15 +1,16 @@
-import { el } from "./dom.js";
+import type { BuiltInData, State } from "./config";
+import { el } from "./dom";
 
 export const ON = 'ON';
 export const OFF = 'OFF';
 export const SYSTEM = 'SYS';
 
-export default function initDark(storage) {
+export default function initDark(storage: BuiltInData<State>) {
 	init(
         '(prefers-color-scheme: dark)',
         'dark-mode',
         storage,
-        'darkMode',
+        'dark',
         {
             legend: "Theme",
             on: "Dark",
@@ -29,43 +30,45 @@ export default function initDark(storage) {
         });
 }
 
+type EventName = "enable" | "disable" | "change";
+
 function init(
-    queryString,
-    bodyClass,
-    storage,
-    storageKey,
-    strings
+    queryString: string,
+    bodyClass: string,
+    storage: BuiltInData<State>,
+    storageKey: string,
+    strings: { legend: string, on: string, off: string, system: string }
 ) {
     const mode = storage[storageKey];
 	const query = window.matchMedia(queryString);
-	const listeners = { enable: [], disable: [], change: [] };
+	const listeners: Record<EventName, Function[]> = { enable: [], disable: [], change: [] };
 
 	const returnedObject = {
 		active: mode == ON ? true : (mode == OFF ? false : query.matches),
 		mode,
-		addEventListener(e, cb) {
+		addEventListener(e: EventName, cb: Function) {
 			listeners[e].push(cb);
 		},
-		removeEventListener(e, cb) {
+		removeEventListener(e: EventName, cb: Function) {
 			listeners[e] = listeners[e].filter(x => x != cb);
 		},
 		setOn() {
 			returnedObject.mode = ON;
-            storage[storageKey] = [ON];
+            storage[storageKey] = ON;
 			if (returnedObject.active) return;
 			returnedObject.active = true;
 			update();
 		},
 		setOff() {
 			returnedObject.mode = OFF;
-            storage[storageKey] = [OFF];
+            storage[storageKey] = OFF;
 			if (!returnedObject.active) return;
 			returnedObject.active = false;
 			update();
 		},
 		setSystem() {
 			returnedObject.mode = SYSTEM;
-            storage[storageKey] = [SYSTEM];
+            storage[storageKey] = SYSTEM;
 			if (returnedObject.active == query.matches) return;
 			returnedObject.active = query.matches;
 			update();
@@ -84,27 +87,24 @@ function init(
         constructor() {
             super();
 
-            const fs = el("fieldset");
+            const fs = el("fieldset", { parent: this });
             el("legend", { text: strings.legend, parent: fs });
 
             const on = el("input", {
-                text: strings.on,
-                parent: fs,
-                attrs: { value: ON, name: bodyClass },
+                parent: el("label", { parent: fs, children: [ el("span", { text: strings.on }) ], }),
+                attrs: { type: "radio", value: ON, name: bodyClass },
                 on: { click: () => returnedObject.setOn() }
-            });
+            }) as HTMLInputElement;
             const off = el("input", {
-                text: strings.off,
-                parent: fs,
-                attrs: { value: OFF, name: bodyClass },
+                parent: el("label", { parent: fs, children: [ el("span", { text: strings.off }) ], }),
+                attrs: { type: "radio", value: OFF, name: bodyClass },
                 on: { click: () => returnedObject.setOff() }
-            });
+            }) as HTMLInputElement;
             const system = el("input", {
-                text: strings.system,
-                parent: fs,
-                attrs: { value: SYSTEM, name: bodyClass },
+                parent: el("label", { parent: fs, children: [ el("span", { text: strings.system }) ], }),
+                attrs: { type: "radio", value: SYSTEM, name: bodyClass },
                 on: { click: () => returnedObject.setSystem() }
-            });
+            }) as HTMLInputElement;
         
             switch(mode) {
                 case ON: on.checked = true; break;

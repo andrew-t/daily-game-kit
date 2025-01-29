@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <title>Daily Game</title>
+</head>
+<body>
+    <script type="module" src="script.js"></script>
+    <div>
+		<heading>
+			<h1>Example Game #<puzzle-id></puzzle-id></h1>
+		</heading>
+        <span id="title"></span>
+        <button id="win">Win</button>
+        <button id="cheat">Cheat</button>
+    </div>
+    <dialog id="instructions">
+        <p>Instructions</p>
+        <!-- Look out for the custom elements you can use in here: -->
+        <p>Current streak: <current-streak>0</current-streak></p>
+        <p>Best streak: <best-streak>0</best-streak></p>
+        <p>Puzzles complete: <completion-percent>0</completion-percent></p>
+        <label class="stacked">
+            <span>Choose a game</span>
+            <puzzle-selector></puzzle-selector>
+        </label>
+        <today-next></today-next>
+        <dark-mode></dark-mode>
+		<reduced-motion></reduced-motion>
+        <label><span>Option</span><input type="checkbox" id="option"></label>
+        <button id="export-button">export</button>
+        <button id="close-instructions">Close</button>
+    </dialog>
+    <dialog id="export">
+		<form method="dialog">
+            <p>Export</p>
+            <export-link>export</export-link>
+            <export-qr-code></export-qr-code>
+            <button>Close</button>
+        </form>
+    </dialog>
+    <dialog id="game-over">
+		<form method="dialog">
+            <p>Game over</p>
+            <p>Current streak: <current-streak class="update-on-end">0</current-streak></p>
+            <p>Best streak: <best-streak class="update-on-end">0</best-streak></p>
+            <p>Puzzles complete: <completion-percent class="update-on-end">0</completion-percent></p>
+            <today-next></today-next>
+            <button>Close</button>
+        </form>
+    </dialog>
+</body>
+</html>

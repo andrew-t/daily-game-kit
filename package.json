@@ -1,14 +1,24 @@
 {
   "name": "daily-game-kit",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "prepare": "npm run build",
+    "build": "tsc"
   },
   "author": "",
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "qrcode-generator": "^1.4.4"
-  }
+    "qr-creator": "^1.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.2"
+  },
+  "declaration": true,
+  "module": "ES2020",
+  "files": [
+    "/dist"
+  ]
 }
