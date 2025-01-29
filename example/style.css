@@ -16,3 +16,8 @@ label.stacked {
 export-qr-code canvas {
     max-width: 20em;
 }
+
+body.dark-mode {
+    background: black;
+    filter: invert();
+}
