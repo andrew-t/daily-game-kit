@@ -1,10 +1,14 @@
+import type { BuiltInData, Config, Data, FieldDefinition, FullConfig, State } from "./config";
+
 import gameStorage from "./storage";
 import dailyInit, { Result } from "./daily";
 import initDark, { SYSTEM } from "./dark";
 import initTodayNext from "./today-next";
 import initStreakStats from "./streak-stats";
 import initPuzzleSelector from "./puzzle-selector";
-import type { BuiltInData, Config, Data, FieldDefinition, FullConfig, State } from "./config";
+
+export { default as initStack } from "./state-stack";
+export { el } from "./dom";
 
 /** the definitions for the built-in data given a particular state type */
 type BuiltInFieldData<T extends State> = FieldDefinition<BuiltInData<T>>;

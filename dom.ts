@@ -1,15 +1,23 @@
+/** Creates an HTML element */
 export function el(
+    /** The tag name (eg, div, button, etc) */
     tag: string,
+    /** Other things you might want to specify about the element */
     options: {
+        /** An array of classes to give the element */
         classList?: string[],
+        /** Some text content to give the element */
         text?: string,
+        /** More elements to put inside it (after the text) */
         children?: HTMLElement[],
+        /** The parent element to append the new element to */
         parent?: HTMLElement,
+        /** Attributes to give the element */
         attrs?: Record<string, string>,
+        /** Event handlers to attach to the element */
         on?: Record<string, EventListenerOrEventListenerObject>
     } = {}
-) {
-
+): HTMLElement {
     const { classList, text, children, parent, attrs, on } = options;
     const $ = document.createElement(tag);
 

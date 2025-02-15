@@ -5,6 +5,7 @@ import type { DailyGameKit } from "./index.js";
 interface StackState<StackType> extends State {
     undoStack: StackType[];
     undoPointer: number;
+    undoCount: number;
 }
 
 /** a function to be called when something happens */
@@ -19,13 +20,13 @@ export default async function initStack<DataType extends Data, StackType, Puzzle
 
     class StateStack {
         undoStack: StackType[];
-        undoPointer: number;
-        listeners: Listener<StackType>[];
+        undoPointer: number = 0;
+        undoCount = 0;
+        pushSinceLastUndo = false;
+        listeners: Listener<StackType>[] = [];
 
         constructor(state: StackType) {
             this.undoStack = [state];
-            this.undoPointer = 0;
-            this.listeners = [];
         }
 
         /** Add a function to call when something changes */
@@ -39,7 +40,8 @@ export default async function initStack<DataType extends Data, StackType, Puzzle
                 storage.savedState = {
                     puzzleId,
                     undoStack: this.undoStack,
-                    undoPointer: this.undoPointer
+                    undoPointer: this.undoPointer,
+                    undoCount: this.undoCount,
                 };
             for (const callback of this.listeners) callback(this.current());
         }
@@ -59,7 +61,8 @@ export default async function initStack<DataType extends Data, StackType, Puzzle
             if (!next) return;
             ++this.undoPointer;
             this.undoStack.splice(this.undoPointer, Infinity);
-            this.undoStack.push(next);
+            this.pushSinceLastUndo = true;
+            this.undoStack.push(deepClone(next));
             this.emitUpdate();
         }
 
@@ -67,6 +70,10 @@ export default async function initStack<DataType extends Data, StackType, Puzzle
         undo(): boolean {
             if (this.undoPointer <= 0) return false;
             --this.undoPointer;
+            if (this.pushSinceLastUndo) {
+                ++this.undoCount;
+                this.pushSinceLastUndo = false;
+            }
             this.emitUpdate();
             return true;
         }
@@ -78,6 +85,13 @@ export default async function initStack<DataType extends Data, StackType, Puzzle
             this.emitUpdate();
             return true;
         }
+
+        /** pushes the initial state onto the top of the stack */
+        restart(): void {
+            if (this.pushSinceLastUndo) ++this.undoCount;
+            this.push(() => this.undoStack[0]);
+            this.pushSinceLastUndo = false;
+        }
     }
 
     const puzzle = await loadPuzzle();
@@ -85,8 +99,9 @@ export default async function initStack<DataType extends Data, StackType, Puzzle
     if (storage.savedState.puzzleId == puzzleId) {
         state.undoPointer = storage.savedState.undoPointer;
         state.undoStack = storage.savedState.undoStack;
+        state.undoCount = storage.savedState.undoCount;
     }
-    return state;
+    return { puzzle, state };
 }
 
 function deepClone<T>(a: T) {
