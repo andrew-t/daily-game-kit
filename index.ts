@@ -6,8 +6,10 @@ import initStreakStats from "./streak-stats";
 import initPuzzleSelector from "./puzzle-selector";
 import type { BuiltInData, Config, Data, FieldDefinition, FullConfig, State } from "./config";
 
+/** the definitions for the built-in data given a particular state type */
 type BuiltInFieldData<T extends State> = FieldDefinition<BuiltInData<T>>;
 
+/** the built-in fields we need to store to make things work */
 const builtInFields: BuiltInFieldData<State> = {
 	streak: { defaultValue: 0 },
 	nextPuzzle: { defaultValue: 0 },
@@ -37,7 +39,14 @@ const builtInFields: BuiltInFieldData<State> = {
 	reducedMotion: { defaultValue: SYSTEM },
 };
 
-export default function dailyGameKit<DataType extends Data, StateType extends State>(_config: Config<DataType>) {
+/** the tools you need to run your game, returned by the main initialisation function */
+export type DailyGameKit<DataType extends Data, StateType extends State> = ReturnType<typeof dailyGameKit<DataType, StateType>>;
+
+/** initialises daily-game-kit */
+export default function dailyGameKit<DataType extends Data, StateType extends State>(
+	/** the config for your game */
+	_config: Config<DataType>
+) {
 
 	const config: FullConfig<DataType, StateType> = {
 		..._config,
