@@ -1,4 +1,5 @@
 import type { Data, State } from "./config";
+import { CHEATED, COMPLETED } from "./daily";
 import type { DailyGameKit } from "./index.js";
 
 /** the state type you should use if you want to use an undo stack */
@@ -71,7 +72,7 @@ export default async function initStack<DataType extends Data, StackType, Puzzle
             if (this.undoPointer <= 0) return false;
             --this.undoPointer;
             if (this.pushSinceLastUndo) {
-                ++this.undoCount;
+                this.bumpUndoCounter();
                 this.pushSinceLastUndo = false;
             }
             this.emitUpdate();
@@ -88,9 +89,15 @@ export default async function initStack<DataType extends Data, StackType, Puzzle
 
         /** pushes the initial state onto the top of the stack */
         restart(): void {
-            if (this.pushSinceLastUndo) ++this.undoCount;
+            if (this.pushSinceLastUndo) this.bumpUndoCounter();
             this.push(() => this.undoStack[0]);
             this.pushSinceLastUndo = false;
+        }
+
+        bumpUndoCounter() {
+            const result = storage.results[puzzleId];
+            if (result == COMPLETED || result == CHEATED) return;
+            ++this.undoCount;
         }
     }
 
