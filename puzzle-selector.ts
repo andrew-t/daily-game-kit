@@ -24,7 +24,7 @@ export default function initStreakStats<DataType extends Data>(
 
 			let options: HTMLElement[] = [];
 
-			for (let i = daily.todaysPuzzleId; i; --i)
+			for (let i = daily.todaysPuzzleId; i > 0; --i)
 				options[i] = el('option', {
 					text: optionText(i),
 					attrs: { value: i.toString() },
