@@ -25,7 +25,7 @@ export default function dailyInit({ launchDate, skipDates, allowFuturePuzzles }:
         if (!/^\d+f?$/.test(puzzleId)) throw new Error("Invalid puzzle code");
         if ((/^\d+$/.test(puzzleId) || !allowFuturePuzzles) && parseInt(puzzleId, 10) > todaysPuzzleId)
             throw new Error("Puzzle not available yet");
-        const strictId = puzzleId.replace(/\+/,'');
+        const strictId = parseInt(puzzleId);
         try {
             return await getJson(`puzzles/${strictId}.json`);
         } catch (e) {
